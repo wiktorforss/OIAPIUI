@@ -6,23 +6,29 @@
   body {
     @apply bg-gray-950 text-gray-100 antialiased;
   }
+  /* Prevent iOS font scaling */
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
 }
 
 @layer components {
   .card {
-    @apply bg-gray-900 border border-gray-800 rounded-xl p-5;
+    @apply bg-gray-900 border border-gray-800 rounded-xl p-4 md:p-5;
   }
   .btn-primary {
-    @apply bg-green-600 hover:bg-green-500 text-white font-medium px-4 py-2 rounded-lg transition-colors text-sm;
+    @apply bg-green-600 hover:bg-green-500 active:bg-green-700 text-white font-medium px-4 py-2 rounded-lg transition-colors text-sm touch-manipulation;
   }
   .btn-secondary {
-    @apply bg-gray-800 hover:bg-gray-700 text-gray-200 font-medium px-4 py-2 rounded-lg transition-colors text-sm;
+    @apply bg-gray-800 hover:bg-gray-700 active:bg-gray-600 text-gray-200 font-medium px-4 py-2 rounded-lg transition-colors text-sm touch-manipulation;
   }
   .btn-danger {
-    @apply bg-red-900 hover:bg-red-800 text-red-200 font-medium px-4 py-2 rounded-lg transition-colors text-sm;
+    @apply bg-red-900 hover:bg-red-800 text-red-200 font-medium px-4 py-2 rounded-lg transition-colors text-sm touch-manipulation;
   }
   .input {
-    @apply bg-gray-800 border border-gray-700 text-gray-100 rounded-lg px-3 py-2 text-sm w-full focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent placeholder-gray-500;
+    @apply bg-gray-800 border border-gray-700 text-gray-100 rounded-lg px-3 py-2.5 text-sm w-full focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent placeholder-gray-500;
+    /* Prevent iOS zoom on focus */
+    font-size: max(16px, 0.875rem);
   }
   .th {
     @apply text-left text-xs font-semibold text-gray-400 uppercase tracking-wider px-4 py-3;

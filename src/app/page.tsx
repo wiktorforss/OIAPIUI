@@ -31,41 +31,28 @@ export default function DashboardPage() {
   useEffect(() => { load(); }, []);
 
   return (
-    <div className="space-y-8 max-w-6xl">
+    <div className="space-y-5 max-w-6xl mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-100">Dashboard</h1>
-          <p className="text-sm text-gray-500 mt-1">Overview of insider activity and your trades</p>
+          <h1 className="text-xl md:text-2xl font-bold text-gray-100">Dashboard</h1>
+          <p className="text-xs md:text-sm text-gray-500 mt-0.5">Overview of insider activity and your trades</p>
         </div>
         <button onClick={load} className="btn-secondary flex items-center gap-2">
           <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
-          Refresh
+          <span className="hidden sm:inline">Refresh</span>
         </button>
       </div>
 
-      {/* Stat cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          label="Insider Trades"
-          value={stats?.total_insider_trades.toLocaleString() ?? "—"}
-          sub="in database"
-        />
-        <StatCard
-          label="My Trades"
-          value={stats?.total_my_trades ?? "—"}
-          sub="logged"
-        />
-        <StatCard
-          label="Tickers Tracked"
-          value={stats?.tickers_tracked ?? "—"}
-          sub="unique symbols"
-          accent="blue"
-        />
+      {/* Stat cards — 2 col on mobile, 4 on desktop */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <StatCard label="Insider Trades" value={stats?.total_insider_trades.toLocaleString() ?? "—"} sub="in database" />
+        <StatCard label="My Trades" value={stats?.total_my_trades ?? "—"} sub="logged" />
+        <StatCard label="Tickers" value={stats?.tickers_tracked ?? "—"} sub="tracked" accent="blue" />
         <StatCard
           label="Avg 1M Return"
           value={stats?.avg_return_1m_all != null ? formatReturn(stats.avg_return_1m_all) : "—"}
-          sub="across all my trades"
+          sub="my trades"
           accent={stats?.avg_return_1m_all != null && stats.avg_return_1m_all >= 0 ? "green" : "red"}
         />
       </div>
@@ -73,49 +60,48 @@ export default function DashboardPage() {
       {/* Best performer */}
       {stats?.best_performing_trade && (
         <div className="card flex items-center gap-3 bg-green-900/20 border-green-800">
-          <span className="text-green-400 text-xl">🏆</span>
+          <span className="text-xl">🏆</span>
           <div>
-            <p className="text-xs text-green-500 font-medium uppercase tracking-wide">Best performing trade</p>
-            <p className="text-green-300 font-semibold">{stats.best_performing_trade}</p>
+            <p className="text-xs text-green-500 font-medium uppercase tracking-wide">Best trade</p>
+            <p className="text-green-300 font-semibold text-sm">{stats.best_performing_trade}</p>
           </div>
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent insider trades */}
+      {/* Recent feeds — stacked on mobile, side by side on desktop */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div className="card">
-          <h2 className="text-sm font-semibold text-gray-300 mb-4">Recent Insider Trades</h2>
-          <div className="space-y-3">
+          <h2 className="text-sm font-semibold text-gray-300 mb-3">Recent Insider Trades</h2>
+          <div className="space-y-0">
             {recentInsider.length === 0 && !loading && (
-              <p className="text-sm text-gray-600">No insider trades loaded yet.</p>
+              <p className="text-sm text-gray-600 py-2">No insider trades loaded yet.</p>
             )}
             {recentInsider.map((t) => (
-              <div key={t.id} className="flex items-center justify-between py-2 border-b border-gray-800 last:border-0">
-                <div>
-                  <div className="flex items-center gap-2">
+              <div key={t.id} className="flex items-center justify-between py-2.5 border-b border-gray-800 last:border-0">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <span className="font-bold text-gray-100">{t.ticker}</span>
                     <span className={clsx("text-xs px-2 py-0.5 rounded-full font-medium", tradeTypeBadge(t.transaction_type))}>
                       {t.transaction_type?.split(" - ")[1] ?? t.transaction_type}
                     </span>
                   </div>
-                  <p className="text-xs text-gray-500 mt-0.5">{t.insider_name} · {formatDate(t.trade_date)}</p>
+                  <p className="text-xs text-gray-500 mt-0.5 truncate">{t.insider_name} · {formatDate(t.trade_date)}</p>
                 </div>
-                <span className="text-sm font-semibold text-gray-300">{formatCurrency(t.value)}</span>
+                <span className="text-sm font-semibold text-gray-300 ml-2 shrink-0">{formatCurrency(t.value)}</span>
               </div>
             ))}
           </div>
         </div>
 
-        {/* My recent trades */}
         <div className="card">
-          <h2 className="text-sm font-semibold text-gray-300 mb-4">My Recent Trades</h2>
-          <div className="space-y-3">
+          <h2 className="text-sm font-semibold text-gray-300 mb-3">My Recent Trades</h2>
+          <div className="space-y-0">
             {recentMine.length === 0 && !loading && (
-              <p className="text-sm text-gray-600">No trades logged yet.</p>
+              <p className="text-sm text-gray-600 py-2">No trades logged yet.</p>
             )}
             {recentMine.map((t) => (
-              <div key={t.id} className="flex items-center justify-between py-2 border-b border-gray-800 last:border-0">
-                <div>
+              <div key={t.id} className="flex items-center justify-between py-2.5 border-b border-gray-800 last:border-0">
+                <div className="min-w-0">
                   <div className="flex items-center gap-2">
                     <span className="font-bold text-gray-100">{t.ticker}</span>
                     <span className={clsx(
@@ -125,9 +111,9 @@ export default function DashboardPage() {
                       {t.trade_type.toUpperCase()}
                     </span>
                   </div>
-                  <p className="text-xs text-gray-500 mt-0.5">{t.shares} shares @ {formatCurrency(t.price)} · {formatDate(t.trade_date)}</p>
+                  <p className="text-xs text-gray-500 mt-0.5 truncate">{t.shares} @ {formatCurrency(t.price)} · {formatDate(t.trade_date)}</p>
                 </div>
-                <div className="text-right">
+                <div className="text-right ml-2 shrink-0">
                   <p className="text-sm font-semibold text-gray-300">{formatCurrency(t.total_value)}</p>
                   {t.performance?.return_1m != null && (
                     <p className={clsx("text-xs font-medium", returnColor(t.performance.return_1m))}>
