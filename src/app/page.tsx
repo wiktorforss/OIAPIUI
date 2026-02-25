@@ -18,7 +18,7 @@ export default function DashboardPage() {
       const [s, insider, mine] = await Promise.all([
         performanceApi.dashboard(),
         insiderApi.list({ limit: 5 }),
-        myTradesApi.list({ limit: 5 }),
+        myTradesApi.list({ limit: "5" }),
       ]);
       setStats(s);
       setRecentInsider(insider);

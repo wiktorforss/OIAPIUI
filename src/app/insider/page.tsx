@@ -2,10 +2,11 @@
 import { useEffect, useState, useCallback } from "react";
 import { insiderApi, type InsiderTrade } from "@/lib/api";
 import { formatCurrency, formatDate, tradeTypeBadge } from "@/lib/utils";
-import { Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, Download, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import clsx from "clsx";
 
 const PAGE_SIZE = 50;
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 export default function InsiderPage() {
   const [trades, setTrades] = useState<InsiderTrade[]>([]);
@@ -14,11 +15,17 @@ export default function InsiderPage() {
   const [loading, setLoading] = useState(true);
 
   // Filters
-  const [ticker, setTicker] = useState("");
-  const [txType, setTxType] = useState("");
+  const [ticker, setTicker]     = useState("");
+  const [txType, setTxType]     = useState("");
   const [minValue, setMinValue] = useState("");
   const [dateFrom, setDateFrom] = useState("");
-  const [dateTo, setDateTo]   = useState("");
+  const [dateTo, setDateTo]     = useState("");
+
+  // Fetch-by-ticker
+  const [fetchTicker, setFetchTicker]   = useState("");
+  const [fetchLoading, setFetchLoading] = useState(false);
+  const [fetchResult, setFetchResult]   = useState<{ message: string; inserted: number; skipped: number } | null>(null);
+  const [fetchError, setFetchError]     = useState("");
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -30,16 +37,18 @@ export default function InsiderPage() {
     if (txType)   params.transaction_type = txType;
     if (minValue) params.min_value = minValue;
     if (dateFrom) params.date_from = dateFrom;
-    if (dateTo)   params.date_to   = dateTo;
+    if (dateTo)   params.date_to = dateTo;
 
     try {
       const [data, count] = await Promise.all([
         insiderApi.list(params),
-        insiderApi.count(Object.fromEntries(
-          Object.entries(params)
-            .filter(([k]) => !["limit","offset"].includes(k))
-            .map(([k,v]) => [k, String(v)])
-        )),
+        insiderApi.count(
+          Object.fromEntries(
+            Object.entries(params)
+              .filter(([k]) => !["limit", "offset"].includes(k))
+              .map(([k, v]) => [k, String(v)])
+          )
+        ),
       ]);
       setTrades(data);
       setTotal(count.count);
@@ -56,6 +65,30 @@ export default function InsiderPage() {
     load();
   }
 
+  async function handleFetch(e: React.FormEvent) {
+    e.preventDefault();
+    if (!fetchTicker.trim()) return;
+    setFetchLoading(true);
+    setFetchResult(null);
+    setFetchError("");
+    try {
+      const res = await fetch(
+        `${API_BASE}/insider/fetch/${fetchTicker.trim().toUpperCase()}?years=5`,
+        { method: "POST" }
+      );
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail ?? "Failed to fetch");
+      setFetchResult(data);
+      setFetchTicker("");
+      // Reload table to show new data
+      load();
+    } catch (err: any) {
+      setFetchError(err.message ?? "Something went wrong");
+    } finally {
+      setFetchLoading(false);
+    }
+  }
+
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
   return (
@@ -63,6 +96,36 @@ export default function InsiderPage() {
       <div>
         <h1 className="text-2xl font-bold text-gray-100">Insider Trades</h1>
         <p className="text-sm text-gray-500 mt-1">SEC Form 4 data from openinsider.com</p>
+      </div>
+
+      {/* Fetch by ticker */}
+      <div className="card border-green-900/50 bg-green-950/20">
+        <p className="text-xs font-semibold text-green-500 uppercase tracking-wider mb-3">
+          Fetch data for a specific company
+        </p>
+        <form onSubmit={handleFetch} className="flex items-center gap-3">
+          <input
+            className="input max-w-[160px]"
+            placeholder="Ticker e.g. AAPL"
+            value={fetchTicker}
+            onChange={e => setFetchTicker(e.target.value)}
+            disabled={fetchLoading}
+          />
+          <button type="submit" disabled={fetchLoading || !fetchTicker.trim()} className="btn-primary flex items-center gap-2">
+            {fetchLoading
+              ? <><Loader2 size={14} className="animate-spin" /> Fetching…</>
+              : <><Download size={14} /> Fetch 5 Years</>
+            }
+          </button>
+          {fetchResult && (
+            <span className="text-sm text-green-400">
+              ✅ {fetchResult.inserted} new trades added, {fetchResult.skipped} duplicates skipped
+            </span>
+          )}
+          {fetchError && (
+            <span className="text-sm text-red-400">❌ {fetchError}</span>
+          )}
+        </form>
       </div>
 
       {/* Filters */}
