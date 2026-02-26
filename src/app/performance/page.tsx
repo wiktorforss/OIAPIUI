@@ -1,3 +1,4 @@
+import TickerLink from "@/components/ui/TickerLink";
 "use client";
 import { useEffect, useState, useCallback } from "react";
 import { myTradesApi, performanceApi, type MyTrade } from "@/lib/api";
@@ -86,7 +87,7 @@ export default function PerformancePage() {
             <div key={t.id} className="card space-y-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="font-bold text-gray-100">{t.ticker}</span>
+                  <TickerLink ticker={t.ticker} />
                   <span className={clsx("text-xs px-2 py-0.5 rounded-full font-medium",
                     t.trade_type === "buy" ? "bg-green-900 text-green-300" : "bg-red-900 text-red-300"
                   )}>{t.trade_type.toUpperCase()}</span>
@@ -135,7 +136,7 @@ export default function PerformancePage() {
                 const p = t.performance;
                 return (
                   <tr key={t.id} className="hover:bg-gray-800/40 transition-colors">
-                    <td className="td font-bold text-gray-100">{t.ticker}</td>
+                    <td className="td"><TickerLink ticker={t.ticker} /></td>
                     <td className="td">
                       <span className={clsx("text-xs px-2 py-0.5 rounded-full font-medium",
                         t.trade_type === "buy" ? "bg-green-900 text-green-300" : "bg-red-900 text-red-300"

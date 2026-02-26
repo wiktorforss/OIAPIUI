@@ -1,3 +1,4 @@
+import TickerLink from "@/components/ui/TickerLink";
 "use client";
 import { useEffect, useState, useCallback } from "react";
 import { insiderApi, type InsiderTrade } from "@/lib/api";
@@ -197,7 +198,7 @@ export default function InsiderPage() {
           <div key={t.id} className="card space-y-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="font-bold text-gray-100">{t.ticker}</span>
+                <TickerLink ticker={t.ticker} />
                 <span className={clsx("text-xs px-2 py-0.5 rounded-full font-medium", tradeTypeBadge(t.transaction_type))}>
                   {t.transaction_type?.split(" - ")[1] ?? t.transaction_type ?? "—"}
                 </span>
@@ -233,7 +234,7 @@ export default function InsiderPage() {
               {!loading && trades.map((t) => (
                 <tr key={t.id} className="hover:bg-gray-800/40 transition-colors">
                   <td className="td whitespace-nowrap">{formatDate(t.trade_date)}</td>
-                  <td className="td font-bold text-gray-100">{t.ticker}</td>
+                  <td className="td"><TickerLink ticker={t.ticker} /></td>
                   <td className="td max-w-[160px] truncate">{t.company_name ?? "—"}</td>
                   <td className="td max-w-[140px] truncate">{t.insider_name ?? "—"}</td>
                   <td className="td max-w-[120px] truncate text-gray-500">{t.insider_title ?? "—"}</td>

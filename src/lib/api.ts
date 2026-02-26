@@ -1,10 +1,26 @@
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
+function getToken(): string | null {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem("token");
+}
+
 async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
+  const token = getToken();
   const res = await fetch(`${API_BASE}${path}`, {
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
     ...options,
   });
+
+  if (res.status === 401) {
+    localStorage.removeItem("token");
+    window.location.href = "/login";
+    throw new Error("Unauthorized");
+  }
+
   if (!res.ok) {
     const error = await res.text();
     throw new Error(`API error ${res.status}: ${error}`);
@@ -93,7 +109,43 @@ export interface TickerSummary {
   avg_return_3m: number | null;
 }
 
-// ─── Insider Trades ───────────────────────────────────────────────────────────
+export interface CompanyData {
+  ticker: string;
+  yahoo_url: string;
+  prices: { date: string; close: number }[];
+  insider_trades: {
+    id: number;
+    date: string | null;
+    insider_name: string | null;
+    insider_title: string | null;
+    transaction_type: string | null;
+    price: number | null;
+    qty: number | null;
+    value: number | null;
+  }[];
+  my_trades: {
+    id: number;
+    date: string | null;
+    trade_type: "buy" | "sell";
+    shares: number;
+    price: number;
+    total_value: number | null;
+    notes: string | null;
+    return_1m: number | null;
+    return_3m: number | null;
+  }[];
+  summary: {
+    total_insider_purchases: number;
+    total_insider_sales: number;
+    total_insider_purchase_value: number;
+    total_insider_sale_value: number;
+    my_trade_count: number;
+    my_buy_count: number;
+    my_sell_count: number;
+  };
+}
+
+// ─── API clients ──────────────────────────────────────────────────────────────
 
 export const insiderApi = {
   list: (params?: Record<string, string | number>) => {
@@ -105,11 +157,8 @@ export const insiderApi = {
     return apiFetch<{ count: number }>(`/insider/count${qs}`);
   },
   tickers: () => apiFetch<string[]>("/insider/tickers"),
-  tickerSummary: (ticker: string) => apiFetch<TickerSummary>(`/insider/ticker/${ticker}/summary`),
   get: (id: number) => apiFetch<InsiderTrade>(`/insider/${id}`),
 };
-
-// ─── My Trades ────────────────────────────────────────────────────────────────
 
 export const myTradesApi = {
   list: (params?: Record<string, string>) => {
@@ -124,8 +173,6 @@ export const myTradesApi = {
     apiFetch<void>(`/my-trades/${id}`, { method: "DELETE" }),
 };
 
-// ─── Performance ──────────────────────────────────────────────────────────────
-
 export const performanceApi = {
   dashboard: () => apiFetch<DashboardStats>("/performance/dashboard"),
   list: (params?: Record<string, string>) => {
@@ -138,4 +185,8 @@ export const performanceApi = {
       method: "PATCH",
       body: JSON.stringify(data),
     }),
+};
+
+export const companyApi = {
+  get: (ticker: string) => apiFetch<CompanyData>(`/company/${ticker}`),
 };

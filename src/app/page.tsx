@@ -1,3 +1,4 @@
+import TickerLink from "@/components/ui/TickerLink";
 "use client";
 import { useEffect, useState } from "react";
 import { performanceApi, insiderApi, myTradesApi, type DashboardStats, type InsiderTrade, type MyTrade } from "@/lib/api";
@@ -80,7 +81,7 @@ export default function DashboardPage() {
               <div key={t.id} className="flex items-center justify-between py-2.5 border-b border-gray-800 last:border-0">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-bold text-gray-100">{t.ticker}</span>
+                    <TickerLink ticker={t.ticker} />
                     <span className={clsx("text-xs px-2 py-0.5 rounded-full font-medium", tradeTypeBadge(t.transaction_type))}>
                       {t.transaction_type?.split(" - ")[1] ?? t.transaction_type}
                     </span>
@@ -103,7 +104,7 @@ export default function DashboardPage() {
               <div key={t.id} className="flex items-center justify-between py-2.5 border-b border-gray-800 last:border-0">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="font-bold text-gray-100">{t.ticker}</span>
+                    <TickerLink ticker={t.ticker} />
                     <span className={clsx(
                       "text-xs px-2 py-0.5 rounded-full font-medium",
                       t.trade_type === "buy" ? "bg-green-900 text-green-300" : "bg-red-900 text-red-300"
