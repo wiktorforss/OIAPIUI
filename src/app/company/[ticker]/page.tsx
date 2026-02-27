@@ -12,7 +12,6 @@ import {
 import { ArrowLeft, ExternalLink, RefreshCw } from "lucide-react";
 import clsx from "clsx";
 
-// ── Period selector ───────────────────────────────────────────────────────────
 const PERIODS = [
   { label: "7D",  days: 7   },
   { label: "14D", days: 14  },
@@ -22,69 +21,60 @@ const PERIODS = [
   { label: "All", days: 0   },
 ] as const;
 
-// ── Custom dot — renders buy/sell markers on the price line ───────────────────
+// ── Custom dot ────────────────────────────────────────────────────────────────
 const CustomDot = (props: any) => {
   const { cx, cy, payload } = props;
   if (!cx || !cy) return null;
-
   const elements: JSX.Element[] = [];
-
-  if (payload.insiderBuys?.length) {
-    elements.push(
-      <g key="ib">
-        <circle cx={cx} cy={cy} r={10} fill="#16a34a" fillOpacity={0.2} stroke="#16a34a" strokeWidth={1.5} />
-        <circle cx={cx} cy={cy} r={5}  fill="#16a34a" stroke="#0f172a" strokeWidth={1.5} />
-      </g>
-    );
-  }
-  if (payload.insiderSells?.length) {
-    elements.push(
-      <g key="is">
-        <circle cx={cx} cy={cy} r={10} fill="#dc2626" fillOpacity={0.2} stroke="#dc2626" strokeWidth={1.5} />
-        <circle cx={cx} cy={cy} r={5}  fill="#dc2626" stroke="#0f172a" strokeWidth={1.5} />
-      </g>
-    );
-  }
-  if (payload.myBuys?.length) {
-    elements.push(
-      <g key="mb">
-        <circle cx={cx} cy={cy} r={7} fill="#22c55e" stroke="#0f172a" strokeWidth={2} />
-        <text x={cx} y={cy + 1} textAnchor="middle" dominantBaseline="middle" fontSize={7} fill="#0f172a" fontWeight="bold">B</text>
-      </g>
-    );
-  }
-  if (payload.mySells?.length) {
-    elements.push(
-      <g key="ms">
-        <circle cx={cx} cy={cy} r={7} fill="#ef4444" stroke="#0f172a" strokeWidth={2} />
-        <text x={cx} y={cy + 1} textAnchor="middle" dominantBaseline="middle" fontSize={7} fill="#0f172a" fontWeight="bold">S</text>
-      </g>
-    );
-  }
-
+  if (payload.insiderBuys?.length) elements.push(
+    <g key="ib">
+      <circle cx={cx} cy={cy} r={10} fill="#16a34a" fillOpacity={0.2} stroke="#16a34a" strokeWidth={1.5} />
+      <circle cx={cx} cy={cy} r={5}  fill="#16a34a" stroke="#0f172a" strokeWidth={1.5} />
+    </g>
+  );
+  if (payload.insiderSells?.length) elements.push(
+    <g key="is">
+      <circle cx={cx} cy={cy} r={10} fill="#dc2626" fillOpacity={0.2} stroke="#dc2626" strokeWidth={1.5} />
+      <circle cx={cx} cy={cy} r={5}  fill="#dc2626" stroke="#0f172a" strokeWidth={1.5} />
+    </g>
+  );
+  if (payload.myBuys?.length) elements.push(
+    <g key="mb">
+      <circle cx={cx} cy={cy} r={7} fill="#22c55e" stroke="#0f172a" strokeWidth={2} />
+      <text x={cx} y={cy + 1} textAnchor="middle" dominantBaseline="middle" fontSize={7} fill="#0f172a" fontWeight="bold">B</text>
+    </g>
+  );
+  if (payload.mySells?.length) elements.push(
+    <g key="ms">
+      <circle cx={cx} cy={cy} r={7} fill="#ef4444" stroke="#0f172a" strokeWidth={2} />
+      <text x={cx} y={cy + 1} textAnchor="middle" dominantBaseline="middle" fontSize={7} fill="#0f172a" fontWeight="bold">S</text>
+    </g>
+  );
   return elements.length ? <g>{elements}</g> : null;
 };
 
-// ── Tooltip ───────────────────────────────────────────────────────────────────
+// ── Tooltip — always USD since it's on the chart ──────────────────────────────
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null;
   const d = payload[0]?.payload;
   if (!d) return null;
+  const fmtVal = (v: number | null) =>
+    v == null ? "—" : `$${Math.abs(v).toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
   return (
     <div className="bg-gray-900 border border-gray-700 rounded-xl p-3 text-xs shadow-2xl max-w-[240px] space-y-1">
       <p className="text-gray-400">{label}</p>
       {d.close != null && <p className="text-gray-100 font-bold text-sm">${d.close.toFixed(2)}</p>}
       {d.insiderBuys?.map((t: any, i: number) => (
-        <p key={i} className="text-green-400">🟢 {t.name}<br /><span className="text-gray-500">{t.title} — {fmt(t.value)}</span></p>
+        <p key={i} className="text-green-400">🟢 {t.name}<br /><span className="text-gray-500">{t.title} — {fmtVal(t.value)}</span></p>
       ))}
       {d.insiderSells?.map((t: any, i: number) => (
-        <p key={i} className="text-red-400">🔴 {t.name}<br /><span className="text-gray-500">{t.title} — {fmt(t.value)}</span></p>
+        <p key={i} className="text-red-400">🔴 {t.name}<br /><span className="text-gray-500">{t.title} — {fmtVal(t.value)}</span></p>
       ))}
       {d.myBuys?.map((t: any, i: number) => (
-        <p key={i} className="text-green-300">✅ My Buy: {t.shares} @ ${t.price?.toFixed(2)}<br /><span className="text-gray-500">{fmt(t.total_value)}</span></p>
+        <p key={i} className="text-green-300">✅ My Buy: {t.shares} @ ${t.price?.toFixed(2)}<br /><span className="text-gray-500">{fmtVal(t.total_value)}</span></p>
       ))}
       {d.mySells?.map((t: any, i: number) => (
-        <p key={i} className="text-red-300">❌ My Sell: {t.shares} @ ${t.price?.toFixed(2)}<br /><span className="text-gray-500">{fmt(t.total_value)}</span></p>
+        <p key={i} className="text-red-300">❌ My Sell: {t.shares} @ ${t.price?.toFixed(2)}<br /><span className="text-gray-500">{fmtVal(t.total_value)}</span></p>
       ))}
     </div>
   );
@@ -92,17 +82,18 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 export default function CompanyPage() {
-  const { ticker }  = useParams<{ ticker: string }>();
-  const router      = useRouter();
+  const { ticker } = useParams<{ ticker: string }>();
+  const router     = useRouter();
 
   const [data, setData]             = useState<CompanyData | null>(null);
   const [loading, setLoading]       = useState(true);
   const [error, setError]           = useState("");
   const [period, setPeriod]         = useState<number>(365);
   const [refreshing, setRefreshing] = useState(false);
+  const [priceMsg, setPriceMsg]     = useState("");
+
   const { currency, rate } = useCurrency();
   const fmt = (v: number | null | undefined) => formatCurrencyWithRate(v, currency, rate);
-  const [priceMsg, setPriceMsg]     = useState("");
 
   useEffect(() => {
     if (!ticker) return;
@@ -129,7 +120,6 @@ export default function CompanyPage() {
     }
   }
 
-  // Filter prices to selected period
   const filteredPrices = useMemo(() => {
     if (!data?.prices?.length) return [];
     if (period === 0) return data.prices;
@@ -139,25 +129,18 @@ export default function CompanyPage() {
     return data.prices.filter(p => p.date >= cutoffStr);
   }, [data, period]);
 
-  // Y-axis domain with padding so line never clips
   const yDomain = useMemo((): [number, number] => {
     const closes = filteredPrices.map(p => p.close).filter((c): c is number => c != null);
     if (!closes.length) return [0, 100];
     const min = Math.min(...closes);
     const max = Math.max(...closes);
     const pad = Math.max((max - min) * 0.12, max * 0.05);
-    return [
-      parseFloat((min - pad).toFixed(4)),
-      parseFloat((max + pad).toFixed(4)),
-    ];
+    return [parseFloat((min - pad).toFixed(4)), parseFloat((max + pad).toFixed(4))];
   }, [filteredPrices]);
 
-  // Merge prices + trade markers into one array for Recharts
   const chartData = useMemo(() => {
     if (!data || !filteredPrices.length) return [];
-    const startDate = filteredPrices[0]?.date ?? "";
-
-    // Group trades by date
+    const startDate     = filteredPrices[0]?.date ?? "";
     const insiderByDate = new Map<string, any[]>();
     const myByDate      = new Map<string, any[]>();
 
@@ -165,22 +148,16 @@ export default function CompanyPage() {
       if (!t.date || t.date < startDate) continue;
       if (!insiderByDate.has(t.date)) insiderByDate.set(t.date, []);
       insiderByDate.get(t.date)!.push({
-        name:  t.insider_name,
-        title: t.insider_title,
-        value: t.value,
-        // Use is_purchase flag from API — no string guessing
+        name: t.insider_name, title: t.insider_title, value: t.value,
         isBuy: (t as any).is_purchase,
       });
     }
-
     for (const t of data.my_trades) {
       if (!t.date || t.date < startDate) continue;
       if (!myByDate.has(t.date)) myByDate.set(t.date, []);
       myByDate.get(t.date)!.push({
-        shares:      t.shares,
-        price:       t.price,
-        total_value: t.total_value,
-        isBuy:       t.trade_type === "buy",
+        shares: t.shares, price: t.price, total_value: t.total_value,
+        isBuy: t.trade_type === "buy",
       });
     }
 
@@ -198,26 +175,22 @@ export default function CompanyPage() {
     });
   }, [data, filteredPrices]);
 
-  // ── Loading / error ───────────────────────────────────────────────────────
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-2 border-green-500 border-t-transparent rounded-full animate-spin" />
+  if (loading) return (
+    <div className="flex items-center justify-center h-64">
+      <div className="w-8 h-8 border-2 border-green-500 border-t-transparent rounded-full animate-spin" />
+    </div>
+  );
+
+  if (error || !data) return (
+    <div className="max-w-6xl mx-auto space-y-4">
+      <button onClick={() => router.back()} className="btn-secondary flex items-center gap-2">
+        <ArrowLeft size={14} /> Back
+      </button>
+      <div className="card text-center py-10">
+        <p className="text-red-400">{error || "Failed to load company data"}</p>
       </div>
-    );
-  }
-  if (error || !data) {
-    return (
-      <div className="max-w-6xl mx-auto space-y-4">
-        <button onClick={() => router.back()} className="btn-secondary flex items-center gap-2">
-          <ArrowLeft size={14} /> Back
-        </button>
-        <div className="card text-center py-10">
-          <p className="text-red-400">{error || "Failed to load company data"}</p>
-        </div>
-      </div>
-    );
-  }
+    </div>
+  );
 
   const s = data.summary;
 
@@ -251,8 +224,8 @@ export default function CompanyPage() {
         {[
           { label: "Insider Buys",  val: s.total_insider_purchases, sub: fmt(s.total_insider_purchase_value), color: "text-green-400" },
           { label: "Insider Sells", val: s.total_insider_sales,     sub: fmt(s.total_insider_sale_value),     color: "text-red-400"   },
-          { label: "My Buys",       val: s.my_buy_count,            sub: null,                                           color: "text-green-400" },
-          { label: "My Sells",      val: s.my_sell_count,           sub: null,                                           color: "text-red-400"   },
+          { label: "My Buys",       val: s.my_buy_count,            sub: null,                                color: "text-green-400" },
+          { label: "My Sells",      val: s.my_sell_count,           sub: null,                                color: "text-red-400"   },
         ].map(({ label, val, sub, color }) => (
           <div key={label} className="card">
             <p className="text-xs text-gray-500 uppercase tracking-wider">{label}</p>
@@ -265,7 +238,6 @@ export default function CompanyPage() {
       {/* Chart */}
       <div className="card">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-          {/* Legend */}
           <div className="flex items-center gap-3 text-xs text-gray-500 flex-wrap">
             <span className="flex items-center gap-1.5">
               <svg width="14" height="14"><circle cx="7" cy="7" r="5" fill="#22c55e"/><text x="7" y="8" textAnchor="middle" fontSize="6" fill="#0f172a" fontWeight="bold">B</text></svg>
@@ -284,8 +256,6 @@ export default function CompanyPage() {
               Insider Sell
             </span>
           </div>
-
-          {/* Period buttons */}
           <div className="flex items-center gap-1 bg-gray-800 rounded-lg p-1 self-start sm:self-auto">
             {PERIODS.map(({ label, days }) => (
               <button key={label} onClick={() => setPeriod(days)}
@@ -346,8 +316,6 @@ export default function CompanyPage() {
 
       {/* Trade lists */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-        {/* Insider trades */}
         <div className="card">
           <h2 className="text-sm font-semibold text-gray-300 mb-3">
             Insider Trades <span className="text-gray-600 font-normal">({data.insider_trades.length})</span>
@@ -380,7 +348,6 @@ export default function CompanyPage() {
           </div>
         </div>
 
-        {/* My positions */}
         <div className="card">
           <h2 className="text-sm font-semibold text-gray-300 mb-3">
             My Positions <span className="text-gray-600 font-normal">({data.my_trades.length})</span>
