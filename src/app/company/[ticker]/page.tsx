@@ -1,13 +1,13 @@
 "use client";
 import { useEffect, useState, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { companyApi, type CompanyData } from "@/lib/api";
+import { companyApi, priceApi, type CompanyData } from "@/lib/api";
 import { formatCurrency, formatDate, formatReturn, returnColor, tradeTypeBadge } from "@/lib/utils";
 import {
   ComposedChart, Line, XAxis, YAxis, Tooltip,
   ResponsiveContainer, CartesianGrid,
 } from "recharts";
-import { ArrowLeft, ExternalLink } from "lucide-react";
+import { ArrowLeft, ExternalLink, RefreshCw } from "lucide-react";
 import clsx from "clsx";
 
 // ── Period options ────────────────────────────────────────────────────────────
@@ -98,7 +98,9 @@ export default function CompanyPage() {
   const [data, setData]       = useState<CompanyData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError]     = useState("");
-  const [period, setPeriod]   = useState<number>(365);
+  const [period, setPeriod]       = useState<number>(365);
+  const [refreshing, setRefreshing] = useState(false);
+  const [priceMsg, setPriceMsg]     = useState("");
 
   useEffect(() => {
     if (!ticker) return;
@@ -108,6 +110,23 @@ export default function CompanyPage() {
       .catch(e => setError(e.message))
       .finally(() => setLoading(false));
   }, [ticker]);
+
+  async function handleRefreshPrices() {
+    if (!ticker) return;
+    setRefreshing(true);
+    setPriceMsg("");
+    try {
+      const res = await priceApi.refresh(ticker as string);
+      setPriceMsg(res.message);
+      // Reload company data to get fresh prices
+      const fresh = await companyApi.get(ticker as string);
+      setData(fresh);
+    } catch (e: any) {
+      setPriceMsg(e.message ?? "Failed to refresh");
+    } finally {
+      setRefreshing(false);
+    }
+  }
 
   // Filter to period
   const filteredPrices = useMemo(() => {
@@ -224,7 +243,13 @@ export default function CompanyPage() {
               className="flex items-center gap-1.5 text-sm text-blue-400 hover:text-blue-300 transition-colors">
               Yahoo Finance <ExternalLink size={12} />
             </a>
+            <button onClick={handleRefreshPrices} disabled={refreshing}
+              className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-300 transition-colors">
+              <RefreshCw size={12} className={refreshing ? "animate-spin" : ""} />
+              {data.prices?.length > 0 ? `${data.prices.length} days cached` : "No price data"}
+            </button>
           </div>
+          {priceMsg && <p className="text-xs text-green-400 mt-1">{priceMsg}</p>}
         </div>
       </div>
 

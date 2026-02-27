@@ -190,3 +190,11 @@ export const performanceApi = {
 export const companyApi = {
   get: (ticker: string) => apiFetch<CompanyData>(`/company/${ticker}`),
 };
+
+export const priceApi = {
+  refresh: (ticker: string) =>
+    apiFetch<{ ticker: string; cached: number; message: string }>(
+      `/company/prices/refresh/${ticker}`,
+      { method: "POST" }
+    ),
+};
