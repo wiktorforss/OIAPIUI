@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   title: "OIMG",
   description: "OIMG",
   icons: {
-    icon:  "/icon.svg",
+    icon:  "/icon.png",
     apple: "/apple-icon.png",
   },
 };
