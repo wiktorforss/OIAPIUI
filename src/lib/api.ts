@@ -198,3 +198,48 @@ export const priceApi = {
       { method: "POST" }
     ),
 };
+
+export interface PortfolioPosition {
+  ticker: string;
+  shares: number;
+  avg_cost: number;
+  cost_basis: number;
+  current_price: number | null;
+  price_date: string | null;
+  current_value: number | null;
+  unrealized_pnl: number | null;
+  unrealized_pct: number | null;
+  realized_pnl: number;
+  total_pnl: number;
+  trade_count: number;
+  first_buy_date: string | null;
+  last_trade_date: string | null;
+  is_open: boolean;
+}
+
+export interface PortfolioSummary {
+  total_portfolio_value: number;
+  total_cost_basis: number;
+  total_unrealized_pnl: number;
+  total_unrealized_pct: number;
+  total_realized_pnl: number;
+  total_pnl: number;
+  open_positions: number;
+  closed_positions: number;
+}
+
+export interface PortfolioData {
+  positions: PortfolioPosition[];
+  summary: PortfolioSummary;
+}
+
+export const portfolioApi = {
+  get: () => apiFetch<PortfolioData>("/portfolio/"),
+};
+
+export const performanceUpdateApi = {
+  updateAll: () => apiFetch<{ trades_checked: number; trades_updated: number; snapshots_filled: number; message: string }>(
+    "/performance/update-all",
+    { method: "POST" }
+  ),
+};

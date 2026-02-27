@@ -4,12 +4,8 @@ import Nav from "@/components/Nav";
 import AuthGuard from "@/components/AuthGuard";
 
 export const metadata: Metadata = {
-  title: "OIMG",
-  description: "OIMG",
-  icons: {
-    icon:  "/icon.png",
-    apple: "/apple-icon.png",
-  },
+  title: "Insider Tracker",
+  description: "Personal insider trading tracker",
 };
 
 export const viewport: Viewport = {

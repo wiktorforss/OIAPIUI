@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, TrendingUp, BookOpen, BarChart2, LogOut } from "lucide-react";
+import { LayoutDashboard, TrendingUp, BookOpen, BarChart2, Briefcase, LogOut } from "lucide-react";
 import { logout } from "@/lib/auth";
 import clsx from "clsx";
 
@@ -10,6 +10,7 @@ const nav = [
   { href: "/insider",     label: "Insider",    icon: TrendingUp },
   { href: "/my-trades",   label: "My Trades",  icon: BookOpen },
   { href: "/performance", label: "Performance",icon: BarChart2 },
+  { href: "/portfolio",   label: "Portfolio",  icon: Briefcase },
 ];
 
 export default function Nav() {

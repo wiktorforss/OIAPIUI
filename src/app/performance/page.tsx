@@ -1,18 +1,20 @@
-import TickerLink from "@/components/ui/TickerLink";
 "use client";
+import TickerLink from "@/components/ui/TickerLink";
 import { useEffect, useState, useCallback } from "react";
-import { myTradesApi, performanceApi, type MyTrade } from "@/lib/api";
+import { myTradesApi, performanceApi, performanceUpdateApi, type MyTrade } from "@/lib/api";
 import { formatCurrency, formatDate, formatReturn, returnColor } from "@/lib/utils";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell, ReferenceLine } from "recharts";
 import clsx from "clsx";
-import { X } from "lucide-react";
+import { X, RefreshCw } from "lucide-react";
 
 export default function PerformancePage() {
   const [trades, setTrades]     = useState<MyTrade[]>([]);
   const [loading, setLoading]   = useState(true);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [updateForm, setUpdateForm] = useState<Record<string, string>>({});
-  const [saving, setSaving]     = useState(false);
+  const [saving, setSaving]       = useState(false);
+  const [updating, setUpdating]   = useState(false);
+  const [updateMsg, setUpdateMsg] = useState("");
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -26,6 +28,20 @@ export default function PerformancePage() {
     .filter(t => t.performance?.return_1m != null)
     .map(t => ({ ticker: t.ticker, return_1m: t.performance!.return_1m! }))
     .sort((a, b) => b.return_1m - a.return_1m);
+
+  async function handleUpdateAll() {
+    setUpdating(true);
+    setUpdateMsg("");
+    try {
+      const res = await performanceUpdateApi.updateAll();
+      setUpdateMsg(res.message);
+      load();
+    } catch (e: any) {
+      setUpdateMsg(e.message ?? "Update failed");
+    } finally {
+      setUpdating(false);
+    }
+  }
 
   async function handleUpdate(tradeId: number) {
     setSaving(true);
@@ -48,9 +64,19 @@ export default function PerformancePage() {
 
   return (
     <div className="space-y-4 max-w-6xl mx-auto">
-      <div>
-        <h1 className="text-xl md:text-2xl font-bold text-gray-100">Performance</h1>
-        <p className="text-xs md:text-sm text-gray-500 mt-0.5">How your trades performed</p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-xl md:text-2xl font-bold text-gray-100">Performance</h1>
+          <p className="text-xs md:text-sm text-gray-500 mt-0.5">How your trades performed</p>
+        </div>
+        <div className="flex flex-col items-end gap-1">
+          <button onClick={handleUpdateAll} disabled={updating}
+            className="btn-primary flex items-center gap-2 text-sm">
+            <RefreshCw size={14} className={updating ? "animate-spin" : ""} />
+            {updating ? "Updating…" : "Auto-fill from Polygon"}
+          </button>
+          {updateMsg && <p className="text-xs text-green-400">{updateMsg}</p>}
+        </div>
       </div>
 
       {/* Chart */}
