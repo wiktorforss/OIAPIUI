@@ -2,7 +2,9 @@
 import { useEffect, useState } from "react";
 import { portfolioApi, type PortfolioData, type PortfolioPosition } from "@/lib/api";
 import TickerLink from "@/components/ui/TickerLink";
-import { formatCurrency, formatDate } from "@/lib/utils";
+import { formatDate } from "@/lib/utils";
+import { useCurrency } from "@/lib/CurrencyContext";
+import { formatCurrencyWithRate } from "@/lib/currency";
 import { RefreshCw, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import clsx from "clsx";
 
@@ -11,7 +13,7 @@ function PnlBadge({ value, pct }: { value: number | null; pct?: number | null })
   const pos = value >= 0;
   return (
     <span className={clsx("font-semibold", pos ? "text-green-400" : "text-red-400")}>
-      {pos ? "+" : ""}{formatCurrency(value)}
+      {pos ? "+" : ""}{fmt(value)}
       {pct != null && <span className="text-xs ml-1 opacity-75">({pos ? "+" : ""}{pct.toFixed(2)}%)</span>}
     </span>
   );
@@ -32,6 +34,8 @@ export default function PortfolioPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError]     = useState("");
   const [showClosed, setShowClosed] = useState(false);
+  const { currency, rate } = useCurrency();
+  const fmt = (v: number | null | undefined) => formatCurrencyWithRate(v, currency, rate);
 
   function load() {
     setLoading(true);
@@ -77,14 +81,14 @@ export default function PortfolioPage() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <SummaryCard
           label="Portfolio Value"
-          value={formatCurrency(summary.total_portfolio_value)}
-          sub={`Cost basis: ${formatCurrency(summary.total_cost_basis)}`}
+          value={fmt(summary.total_portfolio_value)}
+          sub={`Cost basis: ${fmt(summary.total_cost_basis)}`}
           color="text-gray-100"
         />
         <div className="card">
           <p className="text-xs text-gray-500 uppercase tracking-wider">Unrealized P&L</p>
           <p className={clsx("text-xl font-bold mt-1", summary.total_unrealized_pnl >= 0 ? "text-green-400" : "text-red-400")}>
-            {summary.total_unrealized_pnl >= 0 ? "+" : ""}{formatCurrency(summary.total_unrealized_pnl)}
+            {summary.total_unrealized_pnl >= 0 ? "+" : ""}{fmt(summary.total_unrealized_pnl)}
           </p>
           <p className="text-xs text-gray-600 mt-0.5">
             {summary.total_unrealized_pct >= 0 ? "+" : ""}{summary.total_unrealized_pct.toFixed(2)}%
@@ -93,13 +97,13 @@ export default function PortfolioPage() {
         <div className="card">
           <p className="text-xs text-gray-500 uppercase tracking-wider">Realized P&L</p>
           <p className={clsx("text-xl font-bold mt-1", summary.total_realized_pnl >= 0 ? "text-green-400" : "text-red-400")}>
-            {summary.total_realized_pnl >= 0 ? "+" : ""}{formatCurrency(summary.total_realized_pnl)}
+            {summary.total_realized_pnl >= 0 ? "+" : ""}{fmt(summary.total_realized_pnl)}
           </p>
         </div>
         <div className="card">
           <p className="text-xs text-gray-500 uppercase tracking-wider">Total P&L</p>
           <p className={clsx("text-xl font-bold mt-1", totalPnlPos ? "text-green-400" : "text-red-400")}>
-            {totalPnlPos ? "+" : ""}{formatCurrency(summary.total_pnl)}
+            {totalPnlPos ? "+" : ""}{fmt(summary.total_pnl)}
           </p>
           <p className="text-xs text-gray-600 mt-0.5">
             {summary.open_positions} open · {summary.closed_positions} closed
@@ -138,7 +142,7 @@ export default function PortfolioPage() {
                           ? <span className="text-gray-300">${p.current_price.toFixed(4)}<span className="text-gray-600 text-xs ml-1">{p.price_date}</span></span>
                           : <span className="text-gray-600">No price — open company page to fetch</span>}
                       </td>
-                      <td className="td text-gray-300">{formatCurrency(p.current_value)}</td>
+                      <td className="td text-gray-300">{fmt(p.current_value)}</td>
                       <td className="td"><PnlBadge value={p.unrealized_pnl} pct={p.unrealized_pct} /></td>
                       <td className="td text-gray-600">{formatDate(p.first_buy_date)}</td>
                     </tr>
@@ -159,7 +163,7 @@ export default function PortfolioPage() {
                     <div><span className="text-gray-500">Shares</span><span className="text-gray-300 ml-2">{p.shares.toLocaleString()}</span></div>
                     <div><span className="text-gray-500">Avg Cost</span><span className="text-gray-300 ml-2">${p.avg_cost.toFixed(4)}</span></div>
                     <div><span className="text-gray-500">Price</span><span className="text-gray-300 ml-2">{p.current_price != null ? `$${p.current_price.toFixed(4)}` : "—"}</span></div>
-                    <div><span className="text-gray-500">Value</span><span className="text-gray-300 ml-2">{formatCurrency(p.current_value)}</span></div>
+                    <div><span className="text-gray-500">Value</span><span className="text-gray-300 ml-2">{fmt(p.current_value)}</span></div>
                   </div>
                   <p className="text-xs text-gray-600">Since {formatDate(p.first_buy_date)}</p>
                 </div>

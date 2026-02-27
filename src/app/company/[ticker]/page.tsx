@@ -2,7 +2,9 @@
 import { useEffect, useState, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { companyApi, priceApi, type CompanyData } from "@/lib/api";
-import { formatCurrency, formatDate, formatReturn, returnColor } from "@/lib/utils";
+import { formatDate, formatReturn, returnColor } from "@/lib/utils";
+import { useCurrency } from "@/lib/CurrencyContext";
+import { formatCurrencyWithRate } from "@/lib/currency";
 import {
   ComposedChart, Line, XAxis, YAxis, Tooltip,
   ResponsiveContainer, CartesianGrid,
@@ -73,16 +75,16 @@ const CustomTooltip = ({ active, payload, label }: any) => {
       <p className="text-gray-400">{label}</p>
       {d.close != null && <p className="text-gray-100 font-bold text-sm">${d.close.toFixed(2)}</p>}
       {d.insiderBuys?.map((t: any, i: number) => (
-        <p key={i} className="text-green-400">🟢 {t.name}<br /><span className="text-gray-500">{t.title} — {formatCurrency(t.value)}</span></p>
+        <p key={i} className="text-green-400">🟢 {t.name}<br /><span className="text-gray-500">{t.title} — {fmt(t.value)}</span></p>
       ))}
       {d.insiderSells?.map((t: any, i: number) => (
-        <p key={i} className="text-red-400">🔴 {t.name}<br /><span className="text-gray-500">{t.title} — {formatCurrency(t.value)}</span></p>
+        <p key={i} className="text-red-400">🔴 {t.name}<br /><span className="text-gray-500">{t.title} — {fmt(t.value)}</span></p>
       ))}
       {d.myBuys?.map((t: any, i: number) => (
-        <p key={i} className="text-green-300">✅ My Buy: {t.shares} @ ${t.price?.toFixed(2)}<br /><span className="text-gray-500">{formatCurrency(t.total_value)}</span></p>
+        <p key={i} className="text-green-300">✅ My Buy: {t.shares} @ ${t.price?.toFixed(2)}<br /><span className="text-gray-500">{fmt(t.total_value)}</span></p>
       ))}
       {d.mySells?.map((t: any, i: number) => (
-        <p key={i} className="text-red-300">❌ My Sell: {t.shares} @ ${t.price?.toFixed(2)}<br /><span className="text-gray-500">{formatCurrency(t.total_value)}</span></p>
+        <p key={i} className="text-red-300">❌ My Sell: {t.shares} @ ${t.price?.toFixed(2)}<br /><span className="text-gray-500">{fmt(t.total_value)}</span></p>
       ))}
     </div>
   );
@@ -98,6 +100,8 @@ export default function CompanyPage() {
   const [error, setError]           = useState("");
   const [period, setPeriod]         = useState<number>(365);
   const [refreshing, setRefreshing] = useState(false);
+  const { currency, rate } = useCurrency();
+  const fmt = (v: number | null | undefined) => formatCurrencyWithRate(v, currency, rate);
   const [priceMsg, setPriceMsg]     = useState("");
 
   useEffect(() => {
@@ -245,8 +249,8 @@ export default function CompanyPage() {
       {/* Stat cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
-          { label: "Insider Buys",  val: s.total_insider_purchases, sub: formatCurrency(s.total_insider_purchase_value), color: "text-green-400" },
-          { label: "Insider Sells", val: s.total_insider_sales,     sub: formatCurrency(s.total_insider_sale_value),     color: "text-red-400"   },
+          { label: "Insider Buys",  val: s.total_insider_purchases, sub: fmt(s.total_insider_purchase_value), color: "text-green-400" },
+          { label: "Insider Sells", val: s.total_insider_sales,     sub: fmt(s.total_insider_sale_value),     color: "text-red-400"   },
           { label: "My Buys",       val: s.my_buy_count,            sub: null,                                           color: "text-green-400" },
           { label: "My Sells",      val: s.my_sell_count,           sub: null,                                           color: "text-red-400"   },
         ].map(({ label, val, sub, color }) => (
@@ -364,7 +368,7 @@ export default function CompanyPage() {
                       </span>
                       <span className="text-xs text-gray-400 truncate">{t.insider_name}</span>
                     </div>
-                    <span className="text-sm font-semibold text-gray-300 shrink-0">{formatCurrency(t.value)}</span>
+                    <span className="text-sm font-semibold text-gray-300 shrink-0">{fmt(t.value)}</span>
                   </div>
                   <div className="flex justify-between mt-0.5">
                     <span className="text-xs text-gray-600">{t.insider_title}</span>
@@ -395,7 +399,7 @@ export default function CompanyPage() {
                       )}>{t.trade_type.toUpperCase()}</span>
                       <span className="text-sm text-gray-300">{t.shares} × ${t.price.toFixed(2)}</span>
                     </div>
-                    <span className="text-sm font-semibold text-gray-300">{formatCurrency(t.total_value)}</span>
+                    <span className="text-sm font-semibold text-gray-300">{fmt(t.total_value)}</span>
                   </div>
                   <div className="flex justify-between mt-0.5 gap-2">
                     <span className="text-xs text-gray-600 truncate">{t.notes || "—"}</span>

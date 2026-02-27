@@ -3,6 +3,8 @@ import TickerLink from "@/components/ui/TickerLink";
 import { useEffect, useState } from "react";
 import { performanceApi, insiderApi, myTradesApi, type DashboardStats, type InsiderTrade, type MyTrade } from "@/lib/api";
 import StatCard from "@/components/ui/StatCard";
+import { useCurrency } from "@/lib/CurrencyContext";
+import { formatCurrencyWithRate } from "@/lib/currency";
 import { formatCurrency, formatReturn, formatDate, returnColor, tradeTypeBadge } from "@/lib/utils";
 import { RefreshCw } from "lucide-react";
 import clsx from "clsx";
@@ -12,6 +14,8 @@ export default function DashboardPage() {
   const [recentInsider, setRecentInsider] = useState<InsiderTrade[]>([]);
   const [recentMine, setRecentMine] = useState<MyTrade[]>([]);
   const [loading, setLoading] = useState(true);
+  const { currency, rate } = useCurrency();
+  const fmt = (v: number | null | undefined) => formatCurrencyWithRate(v, currency, rate);
 
   async function load() {
     setLoading(true);
@@ -88,7 +92,7 @@ export default function DashboardPage() {
                   </div>
                   <p className="text-xs text-gray-500 mt-0.5 truncate">{t.insider_name} · {formatDate(t.trade_date)}</p>
                 </div>
-                <span className="text-sm font-semibold text-gray-300 ml-2 shrink-0">{formatCurrency(t.value)}</span>
+                <span className="text-sm font-semibold text-gray-300 ml-2 shrink-0">{fmt(t.value)}</span>
               </div>
             ))}
           </div>
@@ -112,10 +116,10 @@ export default function DashboardPage() {
                       {t.trade_type.toUpperCase()}
                     </span>
                   </div>
-                  <p className="text-xs text-gray-500 mt-0.5 truncate">{t.shares} @ {formatCurrency(t.price)} · {formatDate(t.trade_date)}</p>
+                  <p className="text-xs text-gray-500 mt-0.5 truncate">{t.shares} @ {fmt(t.price)} · {formatDate(t.trade_date)}</p>
                 </div>
                 <div className="text-right ml-2 shrink-0">
-                  <p className="text-sm font-semibold text-gray-300">{formatCurrency(t.total_value)}</p>
+                  <p className="text-sm font-semibold text-gray-300">{fmt(t.total_value)}</p>
                   {t.performance?.return_1m != null && (
                     <p className={clsx("text-xs font-medium", returnColor(t.performance.return_1m))}>
                       {formatReturn(t.performance.return_1m)} 1M

@@ -2,6 +2,8 @@ import TickerLink from "@/components/ui/TickerLink";
 "use client";
 import { useEffect, useState, useCallback } from "react";
 import { insiderApi, type InsiderTrade } from "@/lib/api";
+import { useCurrency } from "@/lib/CurrencyContext";
+import { formatCurrencyWithRate } from "@/lib/currency";
 import { formatCurrency, formatDate, tradeTypeBadge } from "@/lib/utils";
 import { Search, Download, ChevronLeft, ChevronRight, Loader2, SlidersHorizontal, X } from "lucide-react";
 import clsx from "clsx";
@@ -14,6 +16,8 @@ export default function InsiderPage() {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(true);
+  const { currency, rate } = useCurrency();
+  const fmt = (v: number | null | undefined) => formatCurrencyWithRate(v, currency, rate);
   const [showFilters, setShowFilters] = useState(false);
 
   const [ticker, setTicker]     = useState("");
@@ -203,7 +207,7 @@ export default function InsiderPage() {
                   {t.transaction_type?.split(" - ")[1] ?? t.transaction_type ?? "—"}
                 </span>
               </div>
-              <span className="font-semibold text-gray-200">{formatCurrency(t.value)}</span>
+              <span className="font-semibold text-gray-200">{fmt(t.value)}</span>
             </div>
             <p className="text-xs text-gray-400 truncate">{t.insider_name ?? "—"} · {t.insider_title ?? "—"}</p>
             <div className="flex items-center justify-between text-xs text-gray-500">
@@ -245,7 +249,7 @@ export default function InsiderPage() {
                   </td>
                   <td className="td whitespace-nowrap">{t.price ? `$${t.price.toFixed(2)}` : "—"}</td>
                   <td className="td whitespace-nowrap">{t.qty?.toLocaleString() ?? "—"}</td>
-                  <td className="td whitespace-nowrap font-semibold">{formatCurrency(t.value)}</td>
+                  <td className="td whitespace-nowrap font-semibold">{fmt(t.value)}</td>
                 </tr>
               ))}
             </tbody>

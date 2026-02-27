@@ -2,6 +2,8 @@ import TickerLink from "@/components/ui/TickerLink";
 "use client";
 import { useEffect, useState, useCallback } from "react";
 import { myTradesApi, type MyTrade, type MyTradeCreate } from "@/lib/api";
+import { useCurrency } from "@/lib/CurrencyContext";
+import { formatCurrencyWithRate } from "@/lib/currency";
 import { formatCurrency, formatDate, formatReturn, returnColor } from "@/lib/utils";
 import { Plus, Trash2, X } from "lucide-react";
 import clsx from "clsx";
@@ -13,6 +15,8 @@ const EMPTY_FORM: MyTradeCreate = {
 export default function MyTradesPage() {
   const [trades, setTrades]     = useState<MyTrade[]>([]);
   const [loading, setLoading]   = useState(true);
+  const { currency, rate } = useCurrency();
+  const fmt = (v: number | null | undefined) => formatCurrencyWithRate(v, currency, rate);
   const [showModal, setShowModal] = useState(false);
   const [form, setForm]         = useState<MyTradeCreate>(EMPTY_FORM);
   const [saving, setSaving]     = useState(false);
@@ -81,7 +85,7 @@ export default function MyTradesPage() {
             </div>
             <div className="flex items-center justify-between">
               <p className="text-sm text-gray-300">{t.shares.toLocaleString()} shares @ ${t.price.toFixed(2)}</p>
-              <p className="font-semibold text-gray-200">{formatCurrency(t.total_value)}</p>
+              <p className="font-semibold text-gray-200">{fmt(t.total_value)}</p>
             </div>
             <div className="flex items-center justify-between text-xs text-gray-500">
               <span>{formatDate(t.trade_date)}</span>
@@ -129,7 +133,7 @@ export default function MyTradesPage() {
                   </td>
                   <td className="td">{t.shares.toLocaleString()}</td>
                   <td className="td">${t.price.toFixed(2)}</td>
-                  <td className="td font-semibold">{formatCurrency(t.total_value)}</td>
+                  <td className="td font-semibold">{fmt(t.total_value)}</td>
                   <td className={clsx("td font-medium", returnColor(t.performance?.return_1w))}>{formatReturn(t.performance?.return_1w)}</td>
                   <td className={clsx("td font-medium", returnColor(t.performance?.return_1m))}>{formatReturn(t.performance?.return_1m)}</td>
                   <td className={clsx("td font-medium", returnColor(t.performance?.return_3m))}>{formatReturn(t.performance?.return_3m)}</td>

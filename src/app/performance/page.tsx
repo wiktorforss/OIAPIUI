@@ -2,6 +2,8 @@
 import TickerLink from "@/components/ui/TickerLink";
 import { useEffect, useState, useCallback } from "react";
 import { myTradesApi, performanceApi, performanceUpdateApi, type MyTrade } from "@/lib/api";
+import { useCurrency } from "@/lib/CurrencyContext";
+import { formatCurrencyWithRate } from "@/lib/currency";
 import { formatCurrency, formatDate, formatReturn, returnColor } from "@/lib/utils";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell, ReferenceLine } from "recharts";
 import clsx from "clsx";
@@ -10,6 +12,8 @@ import { X, RefreshCw } from "lucide-react";
 export default function PerformancePage() {
   const [trades, setTrades]     = useState<MyTrade[]>([]);
   const [loading, setLoading]   = useState(true);
+  const { currency, rate } = useCurrency();
+  const fmt = (v: number | null | undefined) => formatCurrencyWithRate(v, currency, rate);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [updateForm, setUpdateForm] = useState<Record<string, string>>({});
   const [saving, setSaving]       = useState(false);
@@ -120,7 +124,7 @@ export default function PerformancePage() {
                 </div>
                 <span className="text-xs text-gray-500">{formatDate(t.trade_date)}</span>
               </div>
-              <p className="text-sm text-gray-400">Entry: {formatCurrency(p?.price_at_trade)}</p>
+              <p className="text-sm text-gray-400">Entry: {fmt(p?.price_at_trade)}</p>
               {/* Returns grid */}
               <div className="grid grid-cols-3 gap-2">
                 {[["1W", p?.return_1w], ["2W", p?.return_2w], ["1M", p?.return_1m],
@@ -169,7 +173,7 @@ export default function PerformancePage() {
                       )}>{t.trade_type.toUpperCase()}</span>
                     </td>
                     <td className="td whitespace-nowrap">{formatDate(t.trade_date)}</td>
-                    <td className="td">{formatCurrency(p?.price_at_trade)}</td>
+                    <td className="td">{fmt(p?.price_at_trade)}</td>
                     {[p?.return_1w, p?.return_2w, p?.return_1m, p?.return_3m, p?.return_6m, p?.return_1y].map((r, i) => (
                       <td key={i} className={clsx("td font-medium", returnColor(r))}>{formatReturn(r)}</td>
                     ))}
