@@ -127,8 +127,8 @@ export default function InsiderPage() {
             <label className="text-xs text-gray-500">Type</label>
             <select className="input" value={txType} onChange={e => setTxType(e.target.value)}>
               <option value="">All</option>
-              <option value="P - Purchase">Purchase</option>
-              <option value="S - Sale">Sale</option>
+              <option value="P">Purchase</option>
+              <option value="S">Sale</option>
               <option value="F - Tax">Tax</option>
               <option value="X - Exercise">Exercise</option>
             </select>

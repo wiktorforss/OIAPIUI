@@ -7,11 +7,6 @@ import { CurrencyProvider } from "@/lib/CurrencyContext";
 export const metadata: Metadata = {
   title: "Insider Tracker",
   description: "Personal insider trading tracker",
-    robots: {
-    index: false,
-    follow: false,
-    googleBot: { index: false, follow: false },
-  },
 };
 
 export const viewport: Viewport = {
