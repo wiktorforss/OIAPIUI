@@ -33,8 +33,7 @@ export default function LoginPage() {
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-green-900/50 border border-green-800 mb-4">
             <TrendingUp size={28} className="text-green-400" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-100">InsiderTrack</h1>
-          <p className="text-sm text-gray-500 mt-1">Personal insider trading tracker</p>
+          <h1 className="text-2xl font-bold text-gray-100">OIMG</h1>
         </div>
 
         {/* Form */}
