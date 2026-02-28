@@ -6,12 +6,24 @@ import { logout } from "@/lib/auth";
 import { useCurrency } from "@/lib/CurrencyContext";
 import clsx from "clsx";
 
-const nav = [
+// Desktop sidebar shows all items
+const desktopNav = [
   { href: "/",            label: "Dashboard",   icon: LayoutDashboard },
   { href: "/insider",     label: "Insider",     icon: TrendingUp },
   { href: "/my-trades",   label: "My Trades",   icon: BookOpen },
   { href: "/performance", label: "Performance", icon: BarChart2 },
   { href: "/portfolio",   label: "Portfolio",   icon: Briefcase },
+  { href: "/watchlist",   label: "Watchlist",   icon: Eye },
+];
+
+// Mobile bottom tabs — only 5 fit, Watchlist accessible via sidebar on desktop
+// or via direct URL on mobile (link shown in dashboard)
+const mobileNav = [
+  { href: "/",            label: "Home",      icon: LayoutDashboard },
+  { href: "/insider",     label: "Insider",   icon: TrendingUp },
+  { href: "/my-trades",   label: "Trades",    icon: BookOpen },
+  { href: "/portfolio",   label: "Portfolio", icon: Briefcase },
+  { href: "/watchlist",   label: "Watchlist", icon: Eye },
 ];
 
 function CurrencyToggle({ compact = false }: { compact?: boolean }) {
@@ -50,7 +62,7 @@ export default function Nav() {
           <span className="text-green-400 font-bold text-lg tracking-tight">📈 InsiderTrack</span>
         </div>
         <nav className="flex-1 px-3 py-4 space-y-1">
-          {nav.map(({ href, label, icon: Icon }) => (
+          {desktopNav.map(({ href, label, icon: Icon }) => (
             <Link key={href} href={href} className={clsx(
               "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
               pathname === href || (href !== "/" && pathname.startsWith(href))
@@ -84,7 +96,7 @@ export default function Nav() {
 
       {/* ── Mobile bottom tabs ───────────────────────────────────────── */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-gray-900 border-t border-gray-800 flex">
-        {nav.map(({ href, label, icon: Icon }) => (
+        {mobileNav.map(({ href, label, icon: Icon }) => (
           <Link key={href} href={href} className={clsx(
             "flex-1 flex flex-col items-center justify-center py-2 gap-0.5 text-[10px] font-medium transition-colors",
             pathname === href || (href !== "/" && pathname.startsWith(href))

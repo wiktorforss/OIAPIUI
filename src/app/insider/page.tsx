@@ -104,35 +104,9 @@ export default function InsiderPage() {
         </button>
       </div>
 
-      {/* Fetch by ticker */}
-      <div className="card border-green-900/50 bg-green-950/20">
-        <p className="text-xs font-semibold text-green-500 uppercase tracking-wider mb-3">Fetch company data</p>
-        <form onSubmit={handleFetch} className="flex gap-2">
-          <input
-            className="input flex-1 min-w-0"
-            placeholder="Ticker e.g. AAPL"
-            value={fetchTicker}
-            onChange={e => setFetchTicker(e.target.value)}
-            disabled={fetchLoading}
-            autoCapitalize="characters"
-          />
-          <button type="submit" disabled={fetchLoading || !fetchTicker.trim()} className="btn-primary flex items-center gap-2 shrink-0">
-            {fetchLoading
-              ? <Loader2 size={14} className="animate-spin" />
-              : <Download size={14} />
-            }
-            <span className="hidden sm:inline">{fetchLoading ? "Fetching…" : "Fetch 5yr"}</span>
-          </button>
-        </form>
-        {fetchResult && (
-          <p className="text-sm text-green-400 mt-2">✅ {fetchResult.inserted} new, {fetchResult.skipped} skipped</p>
-        )}
-        {fetchError && (
-          <p className="text-sm text-red-400 mt-2">❌ {fetchError}</p>
-        )}
-      </div>
+      
 
-      {/* Filters — always visible on desktop, toggleable on mobile */}
+      {/* Filters */}
       <form
         onSubmit={handleSearch}
         className={clsx(
@@ -179,6 +153,36 @@ export default function InsiderPage() {
           <button type="button" className="btn-secondary" onClick={handleClear}>Clear</button>
         </div>
       </form>
+
+
+      {/* Fetch by ticker */}
+      <div className="card border-green-900/50 bg-green-950/20">
+        <p className="text-xs font-semibold text-green-500 uppercase tracking-wider mb-3">Fetch company data</p>
+        <form onSubmit={handleFetch} className="flex gap-2">
+          <input
+            className="input flex-1 min-w-0"
+            placeholder="Ticker e.g. AAPL"
+            value={fetchTicker}
+            onChange={e => setFetchTicker(e.target.value)}
+            disabled={fetchLoading}
+            autoCapitalize="characters"
+          />
+          <button type="submit" disabled={fetchLoading || !fetchTicker.trim()} className="btn-primary flex items-center gap-2 shrink-0">
+            {fetchLoading
+              ? <Loader2 size={14} className="animate-spin" />
+              : <Download size={14} />
+            }
+            <span className="hidden sm:inline">{fetchLoading ? "Fetching…" : "Fetch 5yr"}</span>
+          </button>
+        </form>
+        {fetchResult && (
+          <p className="text-sm text-green-400 mt-2">✅ {fetchResult.inserted} new, {fetchResult.skipped} skipped</p>
+        )}
+        {fetchError && (
+          <p className="text-sm text-red-400 mt-2">❌ {fetchError}</p>
+        )}
+      </div>
+
 
       {/* Pagination bar */}
       <div className="flex items-center justify-between">

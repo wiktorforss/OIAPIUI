@@ -5,8 +5,8 @@ import AuthGuard from "@/components/AuthGuard";
 import { CurrencyProvider } from "@/lib/CurrencyContext";
 
 export const metadata: Metadata = {
-  title: "Insider Tracker",
-  description: "Personal insider trading tracker",
+  title: "OIMG",
+  description: "OIMG",
 };
 
 export const viewport: Viewport = {
