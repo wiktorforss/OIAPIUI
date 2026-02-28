@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, TrendingUp, BookOpen, BarChart2, Briefcase, LogOut } from "lucide-react";
+import { LayoutDashboard, TrendingUp, BookOpen, BarChart2, Briefcase, Eye, LogOut } from "lucide-react";
 import { logout } from "@/lib/auth";
 import { useCurrency } from "@/lib/CurrencyContext";
 import clsx from "clsx";

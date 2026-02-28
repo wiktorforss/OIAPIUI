@@ -246,3 +246,49 @@ export const performanceUpdateApi = {
     { method: "POST" }
   ),
 };
+
+// ── Watchlist types ───────────────────────────────────────────────────────────
+export interface WatchlistSummary {
+  id: number;
+  name: string;
+  item_count: number;
+  created_at: string;
+}
+
+export interface WatchlistItem {
+  id: number;
+  ticker: string;
+  notes: string | null;
+  added_at: string;
+  price: number | null;
+  price_date: string | null;
+  total_insider_buys: number;
+  total_insider_sells: number;
+  latest_buy_date: string | null;
+  latest_buy_value: number | null;
+  latest_sell_date: string | null;
+}
+
+export interface WatchlistDetail {
+  id: number;
+  name: string;
+  created_at: string;
+  items: WatchlistItem[];
+}
+
+export const watchlistApi = {
+  list: () =>
+    apiFetch<WatchlistSummary[]>("/watchlists/"),
+  create: (name: string) =>
+    apiFetch<WatchlistSummary>("/watchlists/", { method: "POST", body: JSON.stringify({ name }) }),
+  get: (id: number) =>
+    apiFetch<WatchlistDetail>(`/watchlists/${id}`),
+  rename: (id: number, name: string) =>
+    apiFetch<WatchlistSummary>(`/watchlists/${id}`, { method: "PATCH", body: JSON.stringify({ name }) }),
+  delete: (id: number) =>
+    apiFetch<void>(`/watchlists/${id}`, { method: "DELETE" }),
+  addItem: (watchlistId: number, ticker: string, notes?: string) =>
+    apiFetch<WatchlistItem>(`/watchlists/${watchlistId}/items`, { method: "POST", body: JSON.stringify({ ticker, notes }) }),
+  removeItem: (watchlistId: number, itemId: number) =>
+    apiFetch<void>(`/watchlists/${watchlistId}/items/${itemId}`, { method: "DELETE" }),
+};
