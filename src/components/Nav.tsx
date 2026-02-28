@@ -59,7 +59,7 @@ export default function Nav() {
       {/* ── Desktop sidebar ─────────────────────────────────────────── */}
       <aside className="hidden md:flex w-56 shrink-0 bg-gray-900 border-r border-gray-800 flex-col">
         <div className="px-5 py-5 border-b border-gray-800">
-          <span className="text-green-400 font-bold text-lg tracking-tight">📈 InsiderTrack</span>
+          <span className="text-green-400 font-bold text-lg tracking-tight">📈 OIMG</span>
         </div>
         <nav className="flex-1 px-3 py-4 space-y-1">
           {desktopNav.map(({ href, label, icon: Icon }) => (
@@ -85,7 +85,7 @@ export default function Nav() {
 
       {/* ── Mobile top bar ───────────────────────────────────────────── */}
       <div className="md:hidden flex items-center justify-between px-4 py-3 bg-gray-900 border-b border-gray-800 shrink-0">
-        <span className="text-green-400 font-bold tracking-tight">📈 InsiderTrack</span>
+        <span className="text-green-400 font-bold tracking-tight">📈 OIMG</span>
         <div className="flex items-center gap-2">
           <CurrencyToggle compact />
           <button onClick={logout} className="text-gray-500 hover:text-red-400 p-1 transition-colors">
