@@ -1,5 +1,5 @@
-import TickerLink from "@/components/ui/TickerLink";
 "use client";
+import TickerLink from "@/components/ui/TickerLink";
 import { useEffect, useState, useCallback } from "react";
 import { myTradesApi, type MyTrade, type MyTradeCreate } from "@/lib/api";
 import { useCurrency } from "@/lib/CurrencyContext";
