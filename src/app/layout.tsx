@@ -5,8 +5,8 @@ import AuthGuard from "@/components/AuthGuard";
 import { CurrencyProvider } from "@/lib/CurrencyContext";
 
 export const metadata: Metadata = {
-  title: "OIMG",
-  description: "OIMG",
+  title: "Insider Tracker",
+  description: "Personal insider trading tracker",
 };
 
 export const viewport: Viewport = {
@@ -22,7 +22,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <CurrencyProvider>
           <AuthGuard>
             <Nav />
-            <main className="flex-1 overflow-y-auto p-4 md:p-6 pb-24 md:pb-6">
+            <main className="flex-1 overflow-y-auto p-4 md:p-6 pb-28 md:pb-6">
               {children}
             </main>
           </AuthGuard>

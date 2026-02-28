@@ -58,7 +58,7 @@ export function formatCurrencyWithRate(
   const locale = currency === "SEK" ? "sv-SE" : "en-US";
   const formatted = Math.abs(converted).toLocaleString(locale, {
     minimumFractionDigits: 0,
-    maximumFractionDigits: converted < 1 ? 4 : 0,
+    maximumFractionDigits: currency === "SEK" ? 0 : (converted < 1 ? 4 : 0),
   });
   return currency === "SEK"
     ? `${formatted} ${symbol}`

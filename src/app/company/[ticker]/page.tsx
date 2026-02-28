@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { companyApi, priceApi, type CompanyData } from "@/lib/api";
+import { companyApi, priceApi, watchlistApi, type CompanyData, type WatchlistSummary } from "@/lib/api";
 import { formatDate, formatReturn, returnColor } from "@/lib/utils";
 import { useCurrency } from "@/lib/CurrencyContext";
 import { formatCurrencyWithRate } from "@/lib/currency";
@@ -9,7 +9,7 @@ import {
   ComposedChart, Line, XAxis, YAxis, Tooltip,
   ResponsiveContainer, CartesianGrid,
 } from "recharts";
-import { ArrowLeft, ExternalLink, RefreshCw } from "lucide-react";
+import { ArrowLeft, ExternalLink, RefreshCw, Download, Eye } from "lucide-react";
 import clsx from "clsx";
 
 const PERIODS = [
@@ -91,6 +91,11 @@ export default function CompanyPage() {
   const [period, setPeriod]         = useState<number>(365);
   const [refreshing, setRefreshing] = useState(false);
   const [priceMsg, setPriceMsg]     = useState("");
+  const [fetching5yr, setFetching5yr] = useState(false);
+  const [fetch5yrMsg, setFetch5yrMsg] = useState("");
+  const [watchlists, setWatchlists]   = useState<WatchlistSummary[]>([]);
+  const [showWLMenu, setShowWLMenu]   = useState(false);
+  const [wlMsg, setWlMsg]             = useState("");
 
   const { currency, rate } = useCurrency();
   const fmt = (v: number | null | undefined) => formatCurrencyWithRate(v, currency, rate);
@@ -118,6 +123,45 @@ export default function CompanyPage() {
     } finally {
       setRefreshing(false);
     }
+  }
+
+  async function handleFetch5yr() {
+    if (!ticker) return;
+    setFetching5yr(true);
+    setFetch5yrMsg("");
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000"}/insider/fetch/${ticker}?years=5`,
+        { method: "POST", headers: { Authorization: `Bearer ${typeof window !== "undefined" ? localStorage.getItem("token") : ""}` } }
+      );
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail ?? "Failed");
+      setFetch5yrMsg(`✅ ${data.inserted} new trades added`);
+      const fresh = await companyApi.get(ticker as string);
+      setData(fresh);
+    } catch (e: any) {
+      setFetch5yrMsg(`❌ ${e.message}`);
+    } finally {
+      setFetching5yr(false);
+    }
+  }
+
+  async function handleShowWatchlists() {
+    if (showWLMenu) { setShowWLMenu(false); return; }
+    const lists = await watchlistApi.list();
+    setWatchlists(lists);
+    setShowWLMenu(true);
+    setWlMsg("");
+  }
+
+  async function handleAddToWatchlist(watchlistId: number, name: string) {
+    try {
+      await watchlistApi.addItem(watchlistId, ticker as string);
+      setWlMsg(`✅ Added to "${name}"`);
+    } catch (e: any) {
+      setWlMsg(`❌ ${e.message}`);
+    }
+    setShowWLMenu(false);
   }
 
   const filteredPrices = useMemo(() => {
@@ -214,8 +258,34 @@ export default function CompanyPage() {
               <RefreshCw size={12} className={refreshing ? "animate-spin" : ""} />
               {data.prices?.length > 0 ? `${data.prices.length} days cached` : "No price data — click to fetch"}
             </button>
+            <button onClick={handleFetch5yr} disabled={fetching5yr}
+              className="flex items-center gap-1.5 text-xs text-blue-500 hover:text-blue-300 transition-colors">
+              <Download size={12} className={fetching5yr ? "animate-pulse" : ""} />
+              {fetching5yr ? "Fetching…" : "Fetch 5yr"}
+            </button>
+            <div className="relative">
+              <button onClick={handleShowWatchlists}
+                className="flex items-center gap-1.5 text-xs text-purple-400 hover:text-purple-300 transition-colors">
+                <Eye size={12} /> + Watchlist
+              </button>
+              {showWLMenu && (
+                <div className="absolute left-0 top-6 z-50 bg-gray-900 border border-gray-700 rounded-xl shadow-2xl py-2 min-w-[180px]">
+                  {watchlists.length === 0
+                    ? <p className="text-xs text-gray-500 px-3 py-2">No watchlists yet</p>
+                    : watchlists.map(wl => (
+                        <button key={wl.id} onClick={() => handleAddToWatchlist(wl.id, wl.name)}
+                          className="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-gray-800 transition-colors">
+                          {wl.name} <span className="text-gray-600 text-xs">({wl.item_count})</span>
+                        </button>
+                      ))
+                  }
+                </div>
+              )}
+            </div>
           </div>
           {priceMsg && <p className="text-xs text-green-400 mt-1">{priceMsg}</p>}
+          {fetch5yrMsg && <p className="text-xs mt-1">{fetch5yrMsg}</p>}
+          {wlMsg && <p className="text-xs mt-1">{wlMsg}</p>}
         </div>
       </div>
 

@@ -1,10 +1,10 @@
-"use client";
 import TickerLink from "@/components/ui/TickerLink";
+"use client";
 import { useEffect, useState, useCallback } from "react";
 import { insiderApi, type InsiderTrade } from "@/lib/api";
 import { useCurrency } from "@/lib/CurrencyContext";
 import { formatCurrencyWithRate } from "@/lib/currency";
-import { formatCurrency, formatDate, tradeTypeBadge } from "@/lib/utils";
+import { formatDate, tradeTypeBadge, txLabel } from "@/lib/utils";
 import { Search, Download, ChevronLeft, ChevronRight, Loader2, SlidersHorizontal, X } from "lucide-react";
 import clsx from "clsx";
 
@@ -208,7 +208,7 @@ export default function InsiderPage() {
               <div className="flex items-center gap-2">
                 <TickerLink ticker={t.ticker} />
                 <span className={clsx("text-xs px-2 py-0.5 rounded-full font-medium", tradeTypeBadge(t.transaction_type))}>
-                  {t.transaction_type?.split(" - ")[1] ?? t.transaction_type ?? "—"}
+                  {txLabel(t.transaction_type)}
                 </span>
               </div>
               <span className="font-semibold text-gray-200">{fmt(t.value)}</span>
@@ -248,7 +248,7 @@ export default function InsiderPage() {
                   <td className="td max-w-[120px] truncate text-gray-500">{t.insider_title ?? "—"}</td>
                   <td className="td">
                     <span className={clsx("text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap", tradeTypeBadge(t.transaction_type))}>
-                      {t.transaction_type?.split(" - ")[1] ?? t.transaction_type ?? "—"}
+                      {txLabel(t.transaction_type)}
                     </span>
                   </td>
                   <td className="td whitespace-nowrap">{t.price ? `$${t.price.toFixed(2)}` : "—"}</td>
