@@ -291,4 +291,84 @@ export const watchlistApi = {
     apiFetch<WatchlistItem>(`/watchlists/${watchlistId}/items`, { method: "POST", body: JSON.stringify({ ticker, notes }) }),
   removeItem: (watchlistId: number, itemId: number) =>
     apiFetch<void>(`/watchlists/${watchlistId}/items/${itemId}`, { method: "DELETE" }),
+  // NEW: update notes on an existing item
+  updateItemNotes: (watchlistId: number, itemId: number, notes: string) =>
+    apiFetch<WatchlistItem>(`/watchlists/${watchlistId}/items/${itemId}`, {
+      method: "PATCH",
+      body: JSON.stringify({ ticker: "", notes }), // ticker ignored by backend on PATCH
+    }),
+};
+
+
+export interface ScreenerResult {
+  ticker:            string;
+  company_name:      string | null;
+  conviction_score:  number;
+  distinct_buyers:   number;
+  total_trades:      number;
+  total_value:       number;
+  total_buys_ever:   number;
+  total_sells_ever:  number;
+  latest_trade_date: string | null;
+  latest_insider:    string | null;
+  latest_title:      string | null;
+  price:             number | null;
+  is_cluster:        boolean;
+}
+
+export interface ClusterBuyResult {
+  ticker:          string;
+  company_name:    string | null;
+  distinct_buyers: number;
+  total_trades:    number;
+  total_value:     number;
+  first_buy:       string | null;
+  last_buy:        string | null;
+  price:           number | null;
+  insiders: Array<{
+    name:  string | null;
+    title: string | null;
+    value: number | null;
+    date:  string | null;
+  }>;
+}
+
+export const signalsApi = {
+  screener: (params: {
+    days?: number;
+    min_buyers?: number;
+    min_value?: number;
+    officer_only?: boolean;
+    sort_by?: string;
+    limit?: number;
+  }) => {
+    const p: Record<string, string> = {};
+    if (params.days        != null) p.days         = String(params.days);
+    if (params.min_buyers  != null) p.min_buyers    = String(params.min_buyers);
+    if (params.min_value   != null) p.min_value     = String(params.min_value);
+    if (params.officer_only)        p.officer_only  = "true";
+    if (params.sort_by)             p.sort_by       = params.sort_by;
+    if (params.limit       != null) p.limit         = String(params.limit);
+    const qs = new URLSearchParams(p).toString();
+    return apiFetch<ScreenerResult[]>(`/signals/screener?${qs}`);
+  },
+
+  clusterBuys: (params?: { days?: number; min_insiders?: number; min_value?: number }) => {
+    const p: Record<string, string> = {};
+    if (params?.days)         p.days         = String(params.days);
+    if (params?.min_insiders) p.min_insiders = String(params.min_insiders);
+    if (params?.min_value)    p.min_value    = String(params.min_value);
+    const qs = new URLSearchParams(p).toString();
+    return apiFetch<ClusterBuyResult[]>(`/signals/cluster-buys?${qs}`);
+  },
+
+  conviction: (params?: { days?: number; min_score?: number; officer_only?: boolean; limit?: number }) => {
+    const p: Record<string, string> = {};
+    if (params?.days)         p.days         = String(params.days);
+    if (params?.min_score)    p.min_score    = String(params.min_score);
+    if (params?.officer_only) p.officer_only = "true";
+    if (params?.limit)        p.limit        = String(params.limit);
+    const qs = new URLSearchParams(p).toString();
+    return apiFetch<ScreenerResult[]>(`/signals/conviction?${qs}`);
+  },
 };
